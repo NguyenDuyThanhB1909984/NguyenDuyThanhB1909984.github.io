@@ -6,30 +6,67 @@ def find_combinations(hand):
     return comb
 
 def exclude_combination(card_list, comb):
-    return [x for x in card_list if x not in comb[0]]
+    return [x for x in card_list if x not in comb]
 
-def sort_combinations(combs):
-    comb_with_sum = [(sum(comb),comb) for comb in combs]
+
+
+def sort_combinations(combs,comb2s):
+    comb_with_sum = []
+    for comb, comb2 in zip(combs,comb2s):
+        temp = (comb, comb2)
+        if temp not in comb_with_sum:
+            comb_with_sum.append((sum(comb)%10 + sum(comb2)%10,temp))
     return sorted(comb_with_sum, key=lambda x: x[0], reverse=True)
 
+
+
 st.title("Card Combination Finder")
-cards = list(range(1,14))
-selected_cards = st.multiselect("Select 6 cards from the following: ", cards)
-if len(selected_cards) != 6:
-    st.write("Please select 6 cards")
+st.write("Vì bài binh chỉ dựa trên nút, nên cần nhập nút của lá bài. ")
+st.write("Lá bài ách( trên bài là chữ A) là 1 ")
+st.write("3 lá tây( trên bài là chữ J,Q,K) là 10 ")
+
+
+cards = ['chọn',1,2,3,4,5,6,7,8,9,10]
+
+selected_cards =[]
+
+col1, col2 = st.columns(2)
+
+with col1:
+    selected_cards.append(st.selectbox("Lá bài 1 ", cards, key='cards1'))
+    selected_cards.append(st.selectbox("Lá bài 2 ", cards, key='cards2'))
+    selected_cards.append(st.selectbox("Lá bài 3 ", cards, key='cards3'))
+
+with col2:
+    selected_cards.append(st.selectbox("Lá bài 4 ", cards,  key='cards4'))
+    selected_cards.append(st.selectbox("Lá bài 5 ", cards,  key='cards5'))
+    selected_cards.append(st.selectbox("Lá bài 6 ", cards,  key='cards6'))
+
+
+if 'chọn' in selected_cards:
+    st.write("Vui lòng chọn 6 lá")
+
 
 
 else:
     combs = find_combinations(selected_cards)
-    comb_with_sum = sort_combinations(combs)
+    comb2s = [exclude_combination(selected_cards, comb) for comb in combs]
+    comb_with_sum = sort_combinations(combs,comb2s)
+    comb_with_sum = sorted(comb_with_sum, key=lambda x: x[0], reverse=True)
+    
 
-    for comb in combs:
-        comb2 = exclude_combination(selected_cards, combs)
+    
+    for i in range(len(comb_with_sum)):
         
-        st.write(comb2, " ", comb)
-        st.write(sum(comb2)%10, " ",sum(comb)%10 )
-
-    st.write("3 best combinations:")
-    for sum, comb in comb_with_sum[:3]:
-        st.write("Sum: ", sum)
-        st.write("Combination: ", comb)
+        st.markdown("""
+        <style>
+        .big-font {
+            font-size:30px !important;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+     
+        st.markdown(f'<p class="big-font">Kết quả: {sum(comb_with_sum[i][1][0])%10} - {sum(comb_with_sum[i][1][1])%10}</p>', unsafe_allow_html=True)
+        st.markdown(f'<p font-size= "25px"> Cách sắp xếp: {comb_with_sum[i][1][0]} - {tuple(comb_with_sum[i][1][1])}</p>', unsafe_allow_html=True)
+        st.write()
+        
